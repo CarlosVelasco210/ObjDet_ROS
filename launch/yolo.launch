@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
+    <arg name="publish_tf" value="true"/>
+    <arg name="max_depth" value="3.5"/>
+  </include>
+
+  <arg name="depth_image" default="/kinect2/hd/image_depth_rect"/>
+  <arg name="camera_depth_info" default="/kinect2/hd/camera_info"/>
+  <arg name="input_topic" default="/kinect2/hd/image_color"/>
+
+  <arg name="yolo_model" default="best2.pt"/>
+  <arg name="conf_thres" default="0.5"/>
+  
+  <!--Kinect Static-->
+  <node name="static_kinect" pkg="yolov8" type="static_kinect.py" output="screen"/>
+
+  <!-- Object YoloV8 node-->
+  <node name="yolov8_node" pkg="yolov8" type="yolov8_node.py" output="screen">
+    <param name="input_topic" value="$(arg input_topic)"/>
+    <param name="yolo_model" value="$(arg yolo_model)"/>
+    <param name="conf_thres" value="$(arg conf_thres)"/>
+  </node>
+
+  <!-- Object detect3D node-->
+  <node name="detect3d_node" pkg="yolov8" type="detect3d_node.py" output="screen">
+    <param name="depth_image" value="$(arg depth_image)"/>
+    <param name="camera_depth_info" value="$(arg camera_depth_info)"/>
+    <param name="conf_thres" value="$(arg conf_thres)"/>
+  </node>
+
+  <!-- Object debug node -->
+  <node name="debug_node" pkg="yolov8" type="debug_node.py" output="screen">
+    <param name="input_topic" value="$(arg input_topic)"/>
+  </node>
+
+  <!--Publish Objects Transform-->
+  <node name="transform_publish" pkg="yolov8" type="transform_publish.py" output="screen"/>
+
+</launch>
