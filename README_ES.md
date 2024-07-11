@@ -5,11 +5,11 @@ Este proyecto está basado en yolov8_ros creado por mgonzs13 y ha sido modificad
 El proyecto ha sido probado con un Kinect V1 y un Kinect V2. Para el uso de Kinect V2, fue necesario instalar el repositorio iai_kinect2, el cual proporciona herramientas y librerías específicas para su integración con ROS
 
 https://github.com/CarlosVelasco210/DetObj_ROS/assets/69257527/91c92260-9149-4b85-bc3c-493b62194b34
-
+## Entorno
+- ROS Noetic Ninjemyz
 ## Requisitos:
 - Ultralytics YoloV8
 - Iai_kinectV2
-- Ros Noetic Ninjemyz
 ## Tópicos:
 - /yolov8/dbg_image: Imágenes depuradas que muestran los objetos detectados y rastreados. Se pueden visualizar en Rviz.
 - /yolov8/pub_tf: Publica la posición del objeto como un transform en el espacio tridimensional. Permite la visualización de la posición del objeto en Rviz.

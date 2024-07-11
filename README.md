@@ -6,10 +6,11 @@ The project has been tested with Kinect V1 and Kinect V2. For Kinect V2 usage, i
 
 https://github.com/CarlosVelasco210/DetObj_ROS/assets/69257527/91c92260-9149-4b85-bc3c-493b62194b34
 
+## Environment:
+- ROS Noetic Ninjemyz
 ## Requirements:
 - Ultralytics YOLOv8
 - iai_kinectV2
-- ROS Noetic Ninjemyz
 ## Topics:
 - /yolov8/dbg_image: Debug images showing detected and tracked objects. Can be visualized in Rviz.
 - /yolov8/pub_tf: Publishes object position as a transform in 3D space. Allows visualization of object position in Rviz.
