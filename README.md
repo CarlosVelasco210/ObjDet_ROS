@@ -3,7 +3,9 @@
 This project is based on yolov8_ros created by [mgonzs13](https://github.com/mgonzs13/yolov8_ros) and has been modified for use with ROS Noetic Ninjemyz. It is designed for object detection and localization using [Ultralytics_YOLOv8](https://github.com/ultralytics/ultralytics) with depth images.
 The project has been tested with Kinect V1 and Kinect V2. For Kinect V2 usage, it was necessary to install the [IAI_Kinect2](https://github.com/code-iai/iai_kinect2) repository, which provides specific tools and libraries for integration with ROS.
 
-https://github.com/CarlosVelasco210/DetObj_ROS/assets/69257527/91c92260-9149-4b85-bc3c-493b62194b34
+
+https://github.com/user-attachments/assets/6abc9f13-4c22-4cf7-ae43-8e61f9b6836e
+
 
 ## Environment:
 - ROS Noetic Ninjemyz
@@ -26,7 +28,6 @@ The project is configured to be used with Kinect V2. If you wish to use your own
 ``` bash
 cd <catkin_ws/src>
 git clone https://github.com/CarlosVelasco210/DetObj_ROS.git
-cd ~/catkin_ws
 catkin_make
 ```
 ## Run:
