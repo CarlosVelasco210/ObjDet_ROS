@@ -10,6 +10,9 @@ import cv2
 from sensor_msgs.msg import Image
 from typing import Tuple
 
+from geometry_msgs.msg import Pose
+from geometry_msgs.msg import PoseArray
+
 from yolov8.msg import DetectionArray
 from yolov8.msg import Detection
 from yolov8.msg import BoundingBox2D
@@ -31,6 +34,7 @@ class DebugNode:
         image_topic = rospy.get_param("~input_topic")
 
         #pub
+        self._pose_markers_pub = rospy.Publisher("pose_detect", PoseArray,  queue_size=10)
         self._dbg_pub = rospy.Publisher("dbg_image", Image, queue_size=10)
         self._bb_markers_pub = rospy.Publisher("dgb_bb_markers", MarkerArray, queue_size=10)
         self._kp_markers_pub = rospy.Publisher("dgb_kp_markers", MarkerArray, queue_size=10)
@@ -52,6 +56,9 @@ class DebugNode:
         cv_image = self.bridge.imgmsg_to_cv2(img_msg)
         bb_marker_array = MarkerArray()
         kp_marker_array = MarkerArray()
+        pose_marker_array = PoseArray()
+        pose_marker_array.header = img_msg.header
+
 
         detection: Detection
         for detection in detection_msg.detections:
@@ -77,6 +84,9 @@ class DebugNode:
                 marker.id = len(bb_marker_array.markers)
                 bb_marker_array.markers.append(marker)
 
+                poses = self.create_pose_marker(detection)
+                pose_marker_array.poses.append(poses)
+
             if detection.keypoints3d.frame_id:
                 for kp in detection.keypoints3d.data:
                     marker = self.create_kp_marker(kp)
@@ -85,12 +95,13 @@ class DebugNode:
                     marker.id = len(kp_marker_array.markers)
                     kp_marker_array.markers.append(marker)
                     
-        # publish dbg image
+        # publish detections
         self._dbg_pub.publish(self.bridge.cv2_to_imgmsg(cv_image,
                                                            encoding=img_msg.encoding))
         self._bb_markers_pub.publish(bb_marker_array)
         self._kp_markers_pub.publish(kp_marker_array)
-        
+        self._pose_markers_pub.publish(pose_marker_array)
+
     def draw_box(self, cv_image: np.array, detection: Detection, color: Tuple[int]) -> np.array:
 
         # get detection info
@@ -225,6 +236,20 @@ class DebugNode:
         marker.text = str(keypoint.id)
 
         return marker
+    
+    def create_pose_marker(self, detection: Detection) -> Pose:
+        pose_msg = Pose()
+        bbox3d = detection.bbox3d
+        
+        pose_msg.position.x = bbox3d.center.position.x
+        pose_msg.position.y = bbox3d.center.position.y
+        pose_msg.position.z = bbox3d.center.position.z
+        pose_msg.orientation.x = 0
+        pose_msg.orientation.y = 0
+        pose_msg.orientation.z = 0
+        pose_msg.orientation.w = 1
+
+        return pose_msg
 
 if __name__ == "__main__":
     rospy.init_node("debug_node")

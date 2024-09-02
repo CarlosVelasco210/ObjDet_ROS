@@ -23,7 +23,7 @@ from ultralytics.engine.results import Keypoints
 class YoloV8Node:
     def __init__(self):
         
-        path = roslib.packages.get_pkg_dir("ultralytics_ros")
+        path = roslib.packages.get_pkg_dir("yolov8")
         self.bridge = cv_bridge.CvBridge()
 
         #param
@@ -55,33 +55,25 @@ class YoloV8Node:
         results: Results = results[0].cuda()
 
         if results.boxes:
-            #Deteccion de clases , nombre e ID
             hypothesis = self.parse_hypothesis(results)
-            #Deteccion de los cuadros que se detecta en la imagen
             boxes = self.parse_boxes(results)
 
         if results.masks:
-            #Deteccion de mascaras
             masks = self.parse_masks(results)
 
         if results.keypoints:
-            #Deteccion de keypoints de los objetos
-            #Solo sirve para el modelo yolov8-pose
             keypoints = self.parse_keypoints(results)
 
         # create detection msgs
         detections_msg = DetectionArray()
 
         for i in range(len(results)):
-            
-            #Crea una variable msg de tipo Detection donde se guardaran las detecciones
             aux_msg = Detection()
 
             if results.boxes:
                 aux_msg.class_id = hypothesis[i]["class_id"]
                 aux_msg.class_name = hypothesis[i]["class_name"]
                 aux_msg.score = hypothesis[i]["score"]
-
                 aux_msg.bbox = boxes[i]
 
             if results.masks:
@@ -89,9 +81,6 @@ class YoloV8Node:
 
             if results.keypoints:
                 aux_msg.keypoints = keypoints[i]
-
-            # Una vez asignado los nombres de clases, ID, score, masks, box y keypoints con
-            # su respectivo objeto se guarda en la lista detections_msg
             detections_msg.detections.append(aux_msg)
 
         # publish detections
@@ -103,14 +92,12 @@ class YoloV8Node:
         hypothesis_list = []
 
         box_data: Boxes
-        # Recorre cada deteccion y guarda la ID, nombre y score en una lista
         for box_data in results.boxes:
             hypothesis = {
                 "class_id": int(box_data.cls),
                 "class_name": self.model.names[int(box_data.cls)],
                 "score": float(box_data.conf)
             }
-            # Guardando en la lista
             hypothesis_list.append(hypothesis)
 
         return hypothesis_list
@@ -120,7 +107,6 @@ class YoloV8Node:
         boxes_list = []
 
         box_data: Boxes
-        # Recorre cada deteccion y guarda el cuadro delimitdor en msg de tipo BoundingBox2D
         for box_data in results.boxes:
 
             msg = BoundingBox2D()
@@ -129,7 +115,6 @@ class YoloV8Node:
             box = box_data.xywh[0]
             msg.center.position.x = float(box[0])
             msg.center.position.y = float(box[1])
-            # Tamño de alto y ancho
             msg.size.x = float(box[2])
             msg.size.y = float(box[3])
 
@@ -141,8 +126,6 @@ class YoloV8Node:
     def parse_masks(self, results: Results):
 
         masks_list = []
-
-        # Funcion para guardar los Point2D detectados en msg de tipo Point2D
         def create_point2d(x: float, y: float) -> Point2D:
             p = Point2D()
             p.x = x
@@ -150,12 +133,9 @@ class YoloV8Node:
             return p
 
         mask: Masks
-        # Recorre cada deteccion y guarda las mascaras detectadas en msg de tipo Mask
         for mask in results.masks:
 
             msg = Mask()
-
-            #Los puntos de la mascara que se detecto en los objetos
             msg.data = [create_point2d(float(ele[0]), float(ele[1]))
                         for ele in mask.xy[0].tolist()]
             msg.height = results.orig_img.shape[0]
@@ -164,8 +144,6 @@ class YoloV8Node:
             masks_list.append(msg)
 
         return masks_list
-    
-    #Esto se utiliza con el modelo yolov8-pose
     def parse_keypoints(self, results: Results):
 
         keypoints_list = []

@@ -11,17 +11,24 @@ https://github.com/user-attachments/assets/6abc9f13-4c22-4cf7-ae43-8e61f9b6836e
 - ROS Noetic Ninjemyz
 ## Requirements:
 - Ultralytics YOLOv8
-- iai_kinectV2
+- iai_kinectV2 (Optional, only if you have Kinect One)
+- OpenCV
 ## Topics:
 - ```/yolov8/dbg_image```: Debug images showing detected and tracked objects. Can be visualized in Rviz.
-- ```/yolov8/pub_tf```: Publishes object position as a transform in 3D space. Allows visualization of object position in Rviz.
+- ```/yolov8/dgb_bb_markers```: Publishes 3D bounding boxes.
+
 - ```/yolov8/detections```: Objects detected by YOLOv8 using RGB images from the connected device. Each object contains a bounding box and class name.
+
+- ```/yolov8/pose_detect```: Publishes the object's position (not rotation) in RViz.
+
+
 ## Parameters:
-- yolo_model: YOLOv8 model to use. In this case, a custom-trained model was used for detecting the desired object.
-- conf_thresh: Threshold setting for detection (Default value: 0.5)
-- input_topic: Camera topic for RGB images
-- depth_image: Topic providing depth images
-- camera_depth_info: Camera topic providing depth-related information.
+- ```yolo_model```: YOLOv8 model to use. In this case, a custom-trained model was used for detecting the desired object.
+- ```conf_thresh```: Threshold setting for detection (Default value: 0.5)
+- ```input_topic```: Camera topic for RGB images
+- ```depth_image```: Topic providing depth images
+- ```camera_depth_info```: Camera topic providing depth-related information.
+- ```target_frame```: Topic for the frame of the device being used.
 ## Note:
 The project is configured to be used with Kinect V2. If you wish to use your own device or camera, you can modify parameters in the ```yolo.launch``` file according to your requirements.
 ## Installation:

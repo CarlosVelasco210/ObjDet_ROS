@@ -32,6 +32,7 @@ class Detect3D_node:
         depth_image = rospy.get_param("~depth_image")
         camera_depth_info = rospy.get_param("~camera_depth_info")
         self.conf_thres = rospy.get_param("~conf_thres")
+        self.target_frame = rospy.get_param("~target_frame")
 
         #pub
         self._pub3D = rospy.Publisher("detections_3D", DetectionArray, queue_size=10)
@@ -91,7 +92,7 @@ class Detect3D_node:
 
                 bbox3d = Detect3D_node.transform_3d_box(
                     bbox3d, transform[0], transform[1])
-                bbox3d.frame_id = "kinect2_rgb_optical_frame"
+                bbox3d.frame_id = self.target_frame
                 new_detections[-1].bbox3d = bbox3d
 
                 if detection.keypoints.data:
@@ -99,7 +100,7 @@ class Detect3D_node:
                         depth_image, depth_info_msg, detection)
                     keypoints3d = Detect3D_node.transform_3d_keypoints(
                         keypoints3d, transform[0], transform[1])
-                    keypoints3d.frame_id = "kinect2_rgb_optical_frame"
+                    keypoints3d.frame_id = self.target_frame
                     new_detections[-1].keypoints3d = keypoints3d
 
         return new_detections
@@ -110,7 +111,7 @@ class Detect3D_node:
         translation = None
         try:
             transform: TransformStamped = self.tf_buffer.lookup_transform(
-                "kinect2_rgb_optical_frame",
+                self.target_frame,
                 frame_id,
                 rospy.Time.now()
                 )
@@ -136,7 +137,8 @@ class Detect3D_node:
         depth_info: CameraInfo,
         detection: Detection
     ) -> BoundingBox3D:
-
+    
+        CONVERT_TO_METERS = 1000
         # crop depth image by the 2d BB
         center_x = int(detection.bbox.center.position.x)
         center_y = int(detection.bbox.center.position.y)
@@ -149,13 +151,13 @@ class Detect3D_node:
         v_max = min(center_y + size_y // 2, depth_image.shape[0] - 1)
 
         roi = depth_image[v_min:v_max, u_min:u_max] / \
-            1000  # convert to meters
+            CONVERT_TO_METERS  # convert to meters
         if not np.any(roi):
             return None
 
         # find the z coordinate on the 3D BB
         bb_center_z_coord = depth_image[int(center_y)][int(
-            center_x)] / 1000
+            center_x)] / CONVERT_TO_METERS
         z_diff = np.abs(roi - bb_center_z_coord)
         mask_z = z_diff <= self.conf_thres
         if not np.any(mask_z):
